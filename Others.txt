@@ -1,0 +1,149 @@
+-> Command Handler:
+
+client.commands = new Discord.Collection();
+const commands = fs.readdirSync("./Commands/").filter(file => file.endsWith('.js'));
+for (file of commands) {
+  const commandName = file.split(".")[0]
+  const command = require(`./Commands/${commandName}`)
+  client.commands.set(command.name, command)
+};
+--------------------------------------
+
+-> Command Handler with sub-folders:
+
+client.commands = new Discord.Collection();
+const commands = fs.readdirSync("./Commands").filter(f => !f.includes(`.`))
+for (fold of commands) {
+  const folder = fs.readdirSync(`./Commands/${fold}`).filter(file => file.endsWith(`.js`))
+  for(file of folder) {
+    const command = require(`./Commands/${fold}/${file}`)
+    client.commands.set(command.name, command)
+  }
+};
+--------------------------------------
+
+-> Join your bot to voice channel:
+
+client.on("ready", () => {
+    const channel = client.channels.cache.get("945213348000182332");
+    if (!channel) return console.error("The channel does not exist!");
+const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
+let connection = joinVoiceChannel({
+  channelId: channel.id,
+  guildId: channel.guild.id,
+  adapterCreator: channel.guild.voiceAdapterCreator
+})
+});
+--------------------------------------
+
+-> Reaction roles add: 
+
+client.on("messageReactionAdd", async (reaction, user) => {
+  if (reaction.message.partial) await reaction.message.fetch();
+
+  if (reaction.partial)
+    try {
+      await reaction.fetch();
+    }
+    catch (error) {
+      console.log(error);
+      return;
+    }
+
+  if (user.bot) return;
+
+  const roleName = reaction.message.guild.roles.cache.find(r => r.id === "role id here");
+
+  let members = await reaction.message.guild.members.fetch();
+
+  let member = members.get(user.id);
+  
+  if (reaction.message.channel.id == "channel id here") {
+    if (reaction.emoji.name === "emoji id here") {
+      await member.roles.add(roleName);
+    };
+  } else {
+    return;
+  }
+});
+--------------------------------------
+
+-> Reaction roles remove: 
+
+client.on("messageReactionRemove", async (reaction, user) => {
+  if (reaction.message.partial) await reaction.message.fetch();
+
+  if (reaction.partial)
+    try {
+      await reaction.fetch();
+    }
+    catch (error) {
+      console.log(error);
+      return;
+    }
+
+  if (user.bot) return;
+
+  const roleName = reaction.message.guild.roles.cache.find(r => r.id === "role id here");
+
+  let members = await reaction.message.guild.members.fetch();
+
+  let member = members.get(user.id);
+  
+  if (reaction.message.channel.id == "channel id here") {
+    if (reaction.emoji.name === "emoji id here") {
+      await member.roles.remove(roleName);
+    };
+  } else {
+    return;
+  }
+});
+--------------------------------------
+
+-> Welcome Card:
+
+//Welcome card and related stuff
+const Discord = require("discord.js");
+const canvacord = require("canvacord")
+
+module.exports = {
+  name: `guildMemberAdd`,
+  async execute(member, { client, db }) {
+    let status = await db.get(`status_${member.user.id}`) ?? false
+    if(member.guild.id !== "794766515034783764") return;
+    let embed = new Discord.MessageEmbed()
+    .setTitle(`JOINED ${member.user.username}`)
+    .setDescription(`${member} have joined this server.`)
+    .setColor("GREEN") 
+    .setThumbnail(member.displayAvatarURL({dynamic:true}))
+    .setFooter(`ID: ${member.user.id}`)
+    .setTimestamp()
+    client.channels.cache.get("801348336485400596").send({embeds:[embed]})
+    if(!status) member.roles.add('794812916674330644');
+    else if(status) member.roles.add('799954583614914581');
+    member.send('Hello! I just saw you entered King mine server, right? I am King mine bot (KM Bot), a bot 100% coded by King mine  I will give you all the newest and most important news to you here and help you! as King mine told me to do. Also, type !help in the server to know more about this server!!').catch(() => {
+      member.guild.channels.cache.get(`809036792196104264`).send(`Cannot DM **${member.user.tag}**.`)
+    })
+    const WelcomeCard = new canvacord.Welcomer()
+    .setUsername(member.user.username)
+    .setDiscriminator(member.user.discriminator)
+    .setAvatar(member.user.displayAvatarURL({format : "png"}))
+    .setColor("title","YELLOW")
+    .setColor("username-box","YELLOW")
+    .setColor("discriminator-box","YELLOW")
+    .setColor("message-box","YELLOW")
+    .setColor("border","YELLOW")
+    .setColor("avatar","YELLOW")
+    .setBackground("https://wallpaperaccess.com/full/233301.jpg")
+    .setMemberCount(member.guild.memberCount)
+    WelcomeCard.build().then(buffer => {
+      client.channels.cache.get("949565392592982026").send({content: member.user.toString(), files: [new Discord.MessageAttachment(buffer, "welcome.png")] })
+    })
+  }
+};
+--------------------------------------
+
+-> 1-100:
+
+const replies = ["0% You are not Gay!", "1%", "2%", "3%", "4%", "5%", "6%", "7%", "8%", "9%", "10%", "11%", "12%", "13%", "14%", "15%", "16%", "17%", "18%", "19%", "20%", "21%", "22%", "23%", "24%", "25%", "26%", "27%", "28%", "29%", "30%", "31%", "32%", "33%", "34%", "35%", "36%", "37%", "38%", "39%", "40%", "41%", "42%", "43%", "44%", "45%", "46%", "47%", "48%", "49%", "50%", "51%", "52%", "53%", "54%", "55%", "56%", "57%", "58%", "59%", "60%", "61%", "62%", "63%", "64%", "65%", "66%", "67%", "68%", "69%", "70%", "71%", "72%", "73%", "74%", "75%", "76%", "77%", "78%", "79%", "80%", "81%", "82%", "83%", "84%", "85%", "86%", "87%", "88%", "89%", "90%", "91%", "92%", "93%", "94%", "95%", "96%", "97%", "98%", "99%", "100% You are Gay!"]
+--------------------------------------
