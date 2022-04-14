@@ -234,14 +234,25 @@ module.exports = {
 Array.prototype["random"] = function (count = 1) {
   // Return a array only if count is more than 1
   if (count > 1) {
-    let arr = [];
+    // Make sure to clone the array to make sure there're not duplicate values
+    let arr = this.slice(0);
+    // Create an empty array
+    let result = [];
+    // Loop through the count
     for (let i = 0; i < count; i++) {
-      arr.push(this[Math.floor(Math.random() * this.length)]);
+      // Get a random index
+      let index = Math.floor(Math.random() * arr.length);
+      // Push the value to the result array
+      result.push(arr[index]);
+      // Remove the value from the array
+      arr.splice(index, 1);
     }
-    return arr;
+    // Return the result array
+    return result;
+  } else {
+    // Return the random value
+    return this[Math.floor(Math.random() * this.length)];
   }
-  // Return a random element from the array
-  return this[Math.floor(Math.random() * this.length)];
 };
 
 (async function loadRightNow() {
@@ -291,7 +302,7 @@ setInterval(async () => {
     }
 
     // Get the winner by picking winnerCount amount of winners randomly
-    let users = winners.random(winnerCount);
+    let users = winners.random(giveaway.winners);
     // Now edit the message with the winners
     await msg.edit({
       embeds: [
