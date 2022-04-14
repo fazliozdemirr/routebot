@@ -30,6 +30,7 @@
     "jumble-words": "^1.0.1",
     "moment": "^2.29.1",
     "ms": "^2.1.3",
+    "node-fetch": "^2.6.7",
     "prettytime": "^1.0.0",
     "quick.db": "^7.1.3",
     "spud.js": "^1.2.14",
