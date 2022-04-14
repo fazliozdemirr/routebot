@@ -54,7 +54,7 @@ module.exports = {
     }
 
     // Check if they entered a number of winners
-    if (!args[2] || isNaN(parseInt(args[2]))) {
+    if (!args[2] || isNaN(parseInt(args[2])) || parseInt(args[2]) < 1) {
       return message.channel.send({
         embeds: [
           new MessageEmbed()
@@ -260,7 +260,7 @@ setInterval(async () => {
   console.log("calling..");
   giveaways = (
     await Promise.all((await db.list(`giveaway`)).map((a) => db.get(a)))
-  ).filter((giveaway) => giveaway.active && giveaway.end <= Date.now());
+  ).filter((giveaway) => giveaway?.active && giveaway.end <= Date.now());
 
   // Get message and channel for each giveaway using fetch async
   for (let giveaway of giveaways) {
