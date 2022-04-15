@@ -17,6 +17,7 @@ module.exports = {
   name: "giveaway",
   aliases: ["Giveaway", "gaw"],
   description: "Host a giveaway!",
+  inactiveGiveaways: new Map(),
   async run(client, message, args) {
     if (!message.member.permissions.has("KICK_MEMBERS"))
       return message.channel.send({
@@ -37,7 +38,7 @@ module.exports = {
             ),
         ],
       });
-    };
+    }
 
     // Check if they entered a time
     if (!args[1]) {
@@ -51,7 +52,7 @@ module.exports = {
             ),
         ],
       });
-    };
+    }
 
     // Check if they entered a number of winners
     if (!args[2] || isNaN(parseInt(args[2])) || parseInt(args[2]) < 1) {
@@ -65,7 +66,7 @@ module.exports = {
             ),
         ],
       });
-    };
+    }
 
     if (!args[3]) {
       return message.channel.send({
@@ -78,7 +79,7 @@ module.exports = {
             ),
         ],
       });
-    };
+    }
 
     // Price is the last argument, it can be more than one word
     let price = args.slice(3).join(" ");
@@ -101,7 +102,7 @@ module.exports = {
             ),
         ],
       });
-    };
+    }
 
     // Convert the time from millis
     let end = Date.now() + time;
@@ -234,7 +235,7 @@ module.exports = {
   },
 };
 
-Array.prototype["random"] = function(count = 1) {
+Array.prototype["random"] = function (count = 1) {
   // Return a array only if count is more than 1
   if (count > 1) {
     // Make sure to clone the array to make sure there're not duplicate values
@@ -260,6 +261,17 @@ Array.prototype["random"] = function(count = 1) {
 
 (async function loadRightNow() {
   giveaways = await db.list("giveaway");
+
+  let inactiveGiveaways = (
+    await Promise.all(
+      (await db.list("giveaway")).map((giveaway) => db.get(giveaway))
+    )
+  ).filter((a) => !a.active);
+
+  module.exports.inactiveGiveaways = new Map(
+    inactiveGiveaways.map((giveaway) => [giveaway.message, giveaway])
+  );
+
   giveaways = (
     await Promise.all((await db.list(`giveaway`)).map((a) => db.get(a)))
   ).filter((giveaway) => giveaway.active && giveaway.end <= Date.now());
@@ -274,7 +286,7 @@ setInterval(async () => {
   console.log("calling..");
   giveaways = (
     await Promise.all((await db.list(`giveaway`)).map((a) => db.get(a)))
-  ).filter((giveaway) => giveaway ?.active && giveaway.end <= Date.now());
+  ).filter((giveaway) => giveaway?.active && giveaway.end <= Date.now());
 
   // Get message and channel for each giveaway using fetch async
   for (let giveaway of giveaways) {
@@ -308,13 +320,13 @@ setInterval(async () => {
     let users = winners.random(giveaway.winners);
 
     // Now edit the message with the winners
-    await msg.reply({
+    await msg.edit({
       embeds: [
         new MessageEmbed()
           .setTitle(`Giveaway Ended`)
           .setColor("#7289DA")
           .addField(`Prize`, `${giveaway.price}`)
- /*         .addField(`Participants`, `${message.reactions.fetch("🎉").users}`)  */
+          /*         .addField(`Participants`, `${message.reactions.fetch("🎉").users}`)  */
           .addField(
             "Winners",
             users
@@ -329,14 +341,20 @@ setInterval(async () => {
       ],
     });
 
-    // Delete the giveaway
-    db.delete(`giveaway_${giveaway.message}`);
+    // Change the giveaway's active status to false
+    giveaway.active = false;
+
+    // Save the giveaway
+    await db.set(`giveaway_${giveaway.message}`, giveaway);
+
+    // Set the giveaway to inactive
+    module.exports.inactiveGiveaways.set(giveaway.message, giveaway);
 
     // Reply the message to the channel that the giveaway has ended and mention the winners
     await msg.reply({
       content: `**Giveaway ended!**\n\n**Winners:** ${
         users ? users.map((u) => `<@${u.id}>`) : "Not enough participants!"
-        }`,
+      }`,
     });
   }
 }, 1000 * 30);
