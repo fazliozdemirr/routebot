@@ -14,9 +14,9 @@ let giveaways = [];
 let keyLookupGiveaway = new Map();
 
 module.exports = {
-  name: "giveaway2",
-  aliases: ["Giveaway2"],
-  description: "Start a giveaway!",
+  name: "giveaway",
+  aliases: ["Giveaway", "gaw"],
+  description: "Host a giveaway!",
   async run(client, message, args) {
     if (!message.member.permissions.has("KICK_MEMBERS"))
       return message.channel.send({
@@ -33,11 +33,11 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("RED")
             .setDescription(
-              "Wrong command usage!\n\nCommand Usage: `!giveaway2 <#channel> <time> <winners> <prize>`"
+              "Wrong command usage!\n\nCommand Usage: `-giveaway #channel duration winners prize`"
             ),
         ],
       });
-    }
+    };
 
     // Check if they entered a time
     if (!args[1]) {
@@ -47,11 +47,11 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("RED")
             .setDescription(
-              "Wrong command usage!\n\nCommand Usage: `!giveaway2 <#channel> <time> <winners> <prize>`"
+              "Wrong command usage!\n\nCommand Usage: `-giveaway #channel duration winners prize`"
             ),
         ],
       });
-    }
+    };
 
     // Check if they entered a number of winners
     if (!args[2] || isNaN(parseInt(args[2])) || parseInt(args[2]) < 1) {
@@ -61,11 +61,11 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("RED")
             .setDescription(
-              "Wrong command usage!\n\nCommand usage: `!giveaway2 <#channel> <time> <winners> <prize>`"
+              "Wrong command usage!\n\nCommand Usage: `-giveaway #channel duration winners prize`"
             ),
         ],
       });
-    }
+    };
 
     if (!args[3]) {
       return message.channel.send({
@@ -74,14 +74,15 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("RED")
             .setDescription(
-              "Wrong command usage!\n\nUCommand usage: `!giveaway2 <#channel> <time> <winners> <prize>`"
+              "Wrong command usage!\n\nCommand Usage: `-giveaway #channel duration winners prize`"
             ),
         ],
       });
-    }
+    };
 
     // Price is the last argument, it can be more than one word
     let price = args.slice(3).join(" ");
+
     // Slice price to be only 250 characters long
     price = price.slice(0, 250);
 
@@ -96,11 +97,11 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("RED")
             .setDescription(
-              "Wrong command usage!\n\nCommamd usage: `-giveaway2 <#channel> <time> <winners> <prize>`"
+              "Wrong command usage!\n\nCommand Usage: `-giveaway #channel duration winners prize`"
             ),
         ],
       });
-    }
+    };
 
     // Convert the time from millis
     let end = Date.now() + time;
@@ -129,6 +130,7 @@ module.exports = {
           }),
       ],
     });
+
     // React with 🎉
     await msg.react("🎉");
     db.set(`giveaway_${msg.id}`, {
@@ -140,6 +142,7 @@ module.exports = {
       active: true,
       role: role.id,
     });
+
     // Add the giveaway to the giveaways array and the key lookup
     giveaways.push({
       price: price,
@@ -194,7 +197,7 @@ module.exports = {
           .setTitle("Giveaway")
           .setColor("#12c4ff")
           .setDescription(
-            "What role do you need to enter the giveaway? Mention a role or it's id if you want to specify or leave type `none`."
+            "What role do you need to enter the giveaway? Mention a role/role-id if you want to specify or type `none` for no requirements."
           ),
       ],
     });
@@ -222,7 +225,7 @@ module.exports = {
             .setTitle("Giveaway")
             .setColor("#12c4ff")
             .setDescription(
-              "No proper role was mentioned!\n\nUsing `@everyone` as the role."
+              "No role was mentioned!\n\nUsing `@everyone` as the role requirement."
             ),
         ],
       });
@@ -231,7 +234,7 @@ module.exports = {
   },
 };
 
-Array.prototype["random"] = function (count = 1) {
+Array.prototype["random"] = function(count = 1) {
   // Return a array only if count is more than 1
   if (count > 1) {
     // Make sure to clone the array to make sure there're not duplicate values
@@ -271,7 +274,7 @@ setInterval(async () => {
   console.log("calling..");
   giveaways = (
     await Promise.all((await db.list(`giveaway`)).map((a) => db.get(a)))
-  ).filter((giveaway) => giveaway?.active && giveaway.end <= Date.now());
+  ).filter((giveaway) => giveaway ?.active && giveaway.end <= Date.now());
 
   // Get message and channel for each giveaway using fetch async
   for (let giveaway of giveaways) {
@@ -303,13 +306,15 @@ setInterval(async () => {
 
     // Get the winner by picking winnerCount amount of winners randomly
     let users = winners.random(giveaway.winners);
+
     // Now edit the message with the winners
-    await msg.edit({
+    await msg.reply({
       embeds: [
         new MessageEmbed()
           .setTitle(`Giveaway Ended`)
           .setColor("#7289DA")
           .addField(`Prize`, `${giveaway.price}`)
+ /*         .addField(`Participants`, `${message.reactions.fetch("🎉").users}`)  */
           .addField(
             "Winners",
             users
@@ -326,18 +331,18 @@ setInterval(async () => {
 
     // Delete the giveaway
     db.delete(`giveaway_${giveaway.message}`);
-    // Reply the message to the channel that the giveaway has ended and mention the winners
 
+    // Reply the message to the channel that the giveaway has ended and mention the winners
     await msg.reply({
-      content: `🎉 **Giveaway ended!** 🎉\n\nWinners: ${
+      content: `**Giveaway ended!**\n\n**Winners:** ${
         users ? users.map((u) => `<@${u.id}>`) : "Not enough participants!"
-      }`,
+        }`,
     });
   }
 }, 1000 * 30);
 
 // Check reaction event to make sure it is the correct reaction
-client.on("messageReactionAdd", async (reaction, user) => {
+client.on("messageReactionAdd", async (reaction, user, msg) => {
   // Make sure the message is a giveaway by checking if it is in the key lookup
   if (!keyLookupGiveaway.has(reaction.message.id)) return;
   // Get the giveaway
@@ -346,10 +351,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
   if (user.bot) return;
   // Make sure the user is not the author of the message
   if (user.id === reaction.message.author.id) return;
-
   // If the giveaway is not active then return
   if (!giveaway.active) return;
-
   // Make sure that the message is in a guild
   if (!reaction.message.guild) return;
 
@@ -363,9 +366,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
           .setTitle("Giveaway")
           .setColor("#12c4ff")
           .setDescription(
-            "You don't have the required role to enter the giveaway!"
+            `You don't have the required role to enter the giveaway!`
           )
-          .addField("Required Role", `<@&${giveaway.role}>`),
+          .addField("Required Role", `<@&${giveaway.role.name}>`),
       ],
     });
     return;

@@ -8,6 +8,8 @@ module.exports = {
     //Member role add 
 
     //Welcome message 
+    const a = '<a:arrows:962691668920905749>';
+    const w = '<:wow:945828533379428412>';
     const myServer = "940572040166006784";
     const welcomeChannel = "940619456609157150";
 
@@ -24,13 +26,13 @@ New videos every Wednesday and Sunday, Do subscribe if you enjoy the content!`)
       .setDescription(`Hello! ${member}
 Welcome to ConquerX
 
-✨ Please follow the <#940575037763764265> of the Server.
+${a} Please follow the <#940575037763764265> of the Server.
 
-✨ Take your roles from <#940632102813179925>
+${a} Take your roles from <#940632102813179925>
 
-✨ Chat with everyone in <#940572040166006787>.
+${a} Chat with everyone in <#940572040166006787>.
 
-💖 Thank You For Joining Our Server.`)
+${w} Thank You For Joining Our Server.`)
       .setColor("#12c4ff")
       .setImage(`${process.env.welcomeImg}`);
 

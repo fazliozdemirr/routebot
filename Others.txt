@@ -1,3 +1,16 @@
+--------------------------------------
+
+-> Animated Emoji IDs:
+
+Welcome: <a:welcome:964425283723751454>
+
+Verify: <a:verify:964425477353771048>
+
+Pogg: <a:pogg:964337589236686848>
+
+Loading: <a:loading:964421303417315368>
+--------------------------------------
+
 -> Command Handler:
 
 client.commands = new Discord.Collection();

@@ -184,10 +184,9 @@ ${arrow} Others`)
               inter.reply({ embeds: [noPerms], ephemeral: true })
             );
 
-            inter.reply({ content: `Deleting...`, ephemeral: true })
-            buttons.components.forEach(button => button.setDisabled(true))
-            inter.update({ components: [buttons] })
-            await inter.channel.send({ embeds: [deleteEmbed] })
+            inter.reply({ embeds: [deleteEmbed], ephemeral: true })
+
+            inter.channel.send({ embeds: [deleteEmbed] })
 
             setTimeout(async () => {
               await inter.channel.delete()
@@ -225,7 +224,7 @@ ${arrow} Others`)
             inter.update({ components: [addons] })
           };
           //Ticket member remove 
-      
+
           //Ticket settings
           if (inter.customId === `settings`) {
             if (!inter.member.permissions.has('KICK_MEMBERS')) return (
