@@ -1,106 +1,108 @@
 module.exports = {
   name: "ticket",
-  description: "Create a ticket",
-  async run(client, message, args) {
-    const Discord = require("discord.js");
-    const myServer = "940572040166006784";
+  aliases: ["Ticket"],
+  run(client, message, args) {
 
-    const notMyServerEmbed = new Discord.MessageEmbed()
-      .setTitle("Limited Feature")
-      .setURL("https://dsc.gg/conquerx")
-      .setDescription(`This feature is only limited to ConquerX official Server.
-Join our Official Server here: [ConquerX](https://dsc.gg/conquerx)`)
-      .setColor("#12c4ff");
+    const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+    const command = args.shift();
 
-    //If the server is ConquerX
-    if (message.guild.id === myServer) {
+    if (!message.member.permissions.has('MANAGE_CHANNELS')) return message.reply({
+      embeds: [
+        new MessageEmbed()
+          .setColor('RED')
+          .setDescription(`You don't have permission to do that!`)
+      ]
+    })
 
-      const modEmbed = new Discord.MessageEmbed()
-        .setDescription(`**Message:** [Message](${message.url})`)
-        .setColor("12c4ff")
-        .setTimestamp()
-        .setFooter({ text: `This message was issued by Administration` })
-        .setThumbnail(message.author.displayAvatarURL({ dynamic: true, format: 'png' }));
+    const management = new MessageEmbed()
+      .setTitle('Management Ticket')
+      .setDescription(`Clicking this button will open a ticket with the Management Team! You can use this ticket to contact us for any issues or questions that do not fit in the below categories.`)
+      .setColor('ORANGE');
 
-      const buttons = new Discord.MessageActionRow()
-        .addComponents(
-          new Discord.MessageButton()
-            .setLabel('Close')
-            .setStyle('PRIMARY')
-            .setCustomId('close')
-            .setEmoji("🔒")
-        )
-        .addComponents(
-          new Discord.MessageButton()
-            .setLabel('Delete')
-            .setStyle('PRIMARY')
-            .setCustomId('delete')
-            .setEmoji("⛔")
-        );
+    const human = new MessageEmbed()
+      .setTitle('Human Resources Ticket')
+      .setDescription(`Clicking this button will open a ticket with the Human Resources Team! You can use this ticket to contact us for any HR related issues including reporting drivers, application enquires and HR related questions.`)
+      .setColor('ORANGE');
 
-      const embed = new Discord.MessageEmbed()
-        .setTitle(`Welcome ${message.author.username}`)
-        .setURL("https://youtube.com/c/ShadowCoDM")
-        .setColor("#12c4ff")
-        .setDescription(`<:Mod:944912016068468737> Staff will be with you soon, please be patient.`)
-        .addField("Please mention the reason for creating the ticket to proceed:", `<:arrow:945106390781948044> Clan application
-<:arrow:945106390781948044> Event winner prize claim
-<:arrow:945106390781948044> Giveaway winner prize claim
-<:arrow:945106390781948044> User report
-<:arrow:945106390781948044> Staff application
-<:arrow:945106390781948044> Others`)
-        .setFooter({ text: `Note: Creating a ticket without any reason may lead to a mute/kick.` })
-        .setTimestamp();
+    const event = new MessageEmbed()
+      .setTitle('Event Management Ticket')
+      .setDescription(`Clicking this button will open a ticket with the VTC Event Team! You can use this ticket to contact us for event invitations, slot enquiries, general questions and feedback. 
+      
+      Before opening a ticket make sure your event is no more than **3 months** from now .`)
+      .setColor('ORANGE');
 
-      const author = message.author.id;
-      const guild = client.guilds.cache.get('940572040166006784')
-      const modrole = guild.roles.cache.get('940616358666854410');
-      const everyone = guild.roles.cache.get(guild.roles.everyone.id);
-      const bot = guild.roles.cache.get('941297320149016601');
-      const channel = await guild.channels.create(`ticket-${message.author.username}`, { type: 'text', reason: `Modmail created ticket.` });
-      channel.setParent('944243724328775710');
-      channel.setTopic(`Ticket for ${message.author.username}`)
+    const support = new MessageEmbed()
+      .setTitle('Support Ticket')
+      .setDescription(`Clicking this button will open a ticket with the Staff Team! You can use this ticket to contact us for any support related issues.`)
+      .setColor('ORANGE');
 
-      channel.permissionOverwrites.create(modrole, {
-        VIEW_CHANNEL: true,
-        SEND_MESSAGES: true,
-        READ_MESSAGE_HISTORY: true
-      });
-      channel.permissionOverwrites.create(author, {
-        VIEW_CHANNEL: true,
-        SEND_MESSAGES: true,
-        READ_MESSAGE_HISTORY: true
-      });
-      channel.permissionOverwrites.create(everyone, {
-        VIEW_CHANNEL: false
-      });
-      channel.permissionOverwrites.create(bot, {
-        VIEW_CHANNEL: true,
-        SEND_MESSAGES: true,
-        READ_MESSAGE_HISTORY: true,
-        MANAGE_MESSAGES: true
+    if (!['management', 'human', 'event', 'support'].includes(command)) return message.reply({
+      embeds: [
+        new MessageEmbed()
+          .setColor('RED')
+          .setDescription('Please use a valid sub command i.e. `management`, `human`, `event`, `support`')
+      ]
+    });
+
+    const managementBtn = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setStyle('PRIMARY')
+          .setLabel('Management Ticket')
+          .setCustomId('mTicket')
+      );
+
+    const humanBtn = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setStyle('PRIMARY')
+          .setLabel('Human Resouces Ticket')
+          .setCustomId('hTicket')
+      );
+
+    const eventBtn = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setStyle('PRIMARY')
+          .setLabel('Event Management Ticket')
+          .setCustomId('eTicket')
+      );
+
+    const supportBtn = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setStyle('PRIMARY')
+          .setLabel('Support Ticket')
+          .setCustomId('sTicket')
+      );
+
+    if (command === 'management') {
+      message.channel.send({
+        embeds: [management],
+        components: [managementBtn]
       })
+    };
 
-      message.channel.send(`Your ticket has been created in <#${channel.id}>`);
+    if (command === 'human') {
+      message.channel.send({
+        embeds: [human],
+        components: [humanBtn]
+      })
+    };
 
-      client.channels.cache.get(channel.id).send({ embeds: [embed], components: [buttons] });
+    if (command === 'event') {
+      message.channel.send({
+        embeds: [event],
+        components: [eventBtn]
+      })
+    };
 
-      client.channels.cache.get('959357633733730324').send({
-        content: `${process.env.modEmoji} **Mod log:**
-> **Content:** ${message.content}
-> **Member:** ${message.author}
-> **Member tag:** ${message.author.user.tag}
-> **Action:** Ticket create
-> **Ticket:** ${channel}
-> **Channel:** ${message.channel}
-`, embeds: [modEmbed]
-      });
-    }
-    //If the server is ConquerX
-
-    //If the server is not ConquerX
-    else return message.channel.send({ embeds: [notMyServerEmbed] })
-    //If the server is not ConquerX   
+    if (command === 'support') {
+      message.channel.send({
+        embeds: [support],
+        components: [supportBtn]
+      })
+    };
 
   }
 }

@@ -4,74 +4,49 @@ const client = new Discord.Client({
   intents: 32767,
   partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 });
-exports.client = client
-const db = require("quick.db");
-const ms = require("ms");
-const fs = require('fs');
-const memberCounter = require('./Counters/member-counter');
-const ifh = require("intervals-for-humans");
-const pt = require("prettytime");
-const prefix = "-";
-const snipe = new Discord.Collection();
+exports.client = client;
+const { exec } = require('child_process');
+const fs = require("fs")
 //Importing packages
 
 //Express Server
 const express = require("express");
 const app = express();
-
 app.get("/", (req, res) => {
-  res.send(`Successfully logged in!
-Succesfully loaded ${client.commands.size} commands!`)
+  res.send('Bot is working!')
 });
-
 app.listen(3000, () => {
   console.log(`Successfully logged in!
 Succesfully loaded ${client.commands.size} commands!`)
 });
 //Express server
 
-//Command handler
+//Handlers
 client.commands = new Discord.Collection();
-const commands = fs.readdirSync("./Commands").filter(f => !f.includes(`.`))
-for (fold of commands) {
-  const folder = fs.readdirSync(`./Commands/${fold}`).filter(file => file.endsWith(`.js`))
-  for (file of folder) {
-    const command = require(`./Commands/${fold}/${file}`)
-    client.commands.set(command.name, command)
-  }
-}
-//Command handler
-
-//Event handler
 client.events = new Discord.Collection();
-const events = fs.readdirSync("./Events")
-for (file of events) {
-  const event = require(`./Events/${file}`)
-  client.events.set(event.name, event)
-}
-client.events.forEach(event => {
-  if (event.ws) {
-    client.ws.on(event.name, item => {
-      event.run(item, { client, Discord })
-    })
-  } else {
-    client.on(event.name, (item1, item2) => {
-      event.run(item1, { client, Discord, db, prefix, memberCounter, snipe }, item2)
-    })
-  }
-})
-//Event handler
+['commands', 'events'].forEach(handler => {
+  require(`./Handlers/${handler}`)(client, Discord)
+});
+//Handlers
 
-//Debug, Unhandled Rejection
+//Anti-crash
 client.on('debug', info => {
-  console.log(info)
+  if (info.startsWith(`Hit a 429`)) exec(`kill 1`, () => { })
 });
-
-process.on("unhandledRejection", async error => {
-  console.log(error);
+process.on("unhandledRejection", (reason, p) => {
+  console.error(reason, p);
 });
-//Debug, Unhandled Rejection
+process.on("uncaughtException", (err, origin) => {
+  console.error(err, origin)
+});
+process.on("uncaughtExceptionMonitor", (err, origin) => {
+  console.error(err, origin);
+});
+process.on("multipleResolves", (type, promise, reason) => {
+  console.error(type, promise, reason);
+});
+//Anti-crash
 
 //Bot login
-client.login(process.env.token).catch((e) => console.log(e));
+client.login('#YOUR BOT TOKEN HERE').catch((e) => console.log(e));
 //Bot login

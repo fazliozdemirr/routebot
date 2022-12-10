@@ -1,31 +1,16 @@
 module.exports = {
   name: `guildMemberRemove`,
   async run(member, { client, Discord }) {
+const { MessageEmbed } = require('discord.js');
+const channel = '1012096570797342720';
 
-    //Leave message
-    const myServer = "940572040166006784";
-    const leaveChannel = "945110178666278913";
-
-    const leaveMsg = new Discord.MessageEmbed()
-      .setTitle("Member Left")
-      .setURL("https://youtube.com/ShadowCoDM")
-      .setDescription(`${member} left the Server.`)
-      .setColor("#12c4ff");
-    
-    if (member.guild.id === myServer) {
-      
-      client.channels.cache.get(leaveChannel).send({ embeds: [leaveMsg], content: `${member.user.tag}` })
-
-      client.channels.cache.get('959357633733730324').send({
-        content: `${process.env.modEmoji} **Mod log:**
-> **Member:** ${member}
-> **Member id:** ${member.id}
-> **Member tag:** ${member.user.tag}
-> **Action:** Server Leave
-> **Server:** ${member.guild.id}`, embeds: [leaveMsg]
-      })
-    }
-    //Leave message
+client.channels.cache.get(channel).send({
+      embeds: [
+        new MessageEmbed()
+        .setColor('#12c4ff')
+        .setDescription(`${member.user.tag} has left the server!`)
+      ]
+    });
 
   }
 }

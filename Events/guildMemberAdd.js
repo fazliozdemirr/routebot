@@ -1,59 +1,25 @@
 module.exports = {
   name: `guildMemberAdd`,
   async run(member, { client, Discord }) {
+    const { MessageEmbed } = require('discord.js');
+    const channel = '1012093101269070004';
 
-    //Member role add 
-    const welcomeRole = member.guild.roles.cache.find(role => role.name === "Member");
-    member.roles.add(welcomeRole);
-    //Member role add 
+    client.channels.cache.get(channel).send({
+      embeds: [
+        new MessageEmbed()
+          .setColor('85c441')
+          .setDescription(`Hey ${member}\nIt's awesome to have you here. 💚\n\nTo find more about Nexon, feel free to read <#1012095177629909122>\n\n> **If you are interested in joining our VTC**?\n>  Head over to <#1012095249503490170>\n\n> **Have any questions ?**\n> Feel free to ask in <#1012093623631884369> \n\nWe hope you will enjoy your time here!`)
+          .setImage('https://media.discordapp.net/attachments/982291652314017864/982958910849818674/Nexon-welcome-banner-1.2-.png')
+          .setThumbnail('https://i.imgur.com/m740VV3.jpg')
+          .setFooter({
+            text: 'Nexon Logistics',
+            iconURL: 'https://i.imgur.com/m740VV3.jpg'
+          })
+      ]
+    });
 
-    //Welcome message 
-    const a = '<a:arrows:962691668920905749>';
-    const w = '<:wow:945828533379428412>';
-    const myServer = "940572040166006784";
-    const welcomeChannel = "940619456609157150";
-
-    const memberEmbed = new Discord.MessageEmbed()
-      .setTitle(`Welcome ${member.displayName}`)
-      .setURL("https://www.youtube.com/c/ShadowCoDM")
-      .setDescription(`Do check out Shadow on [YouTube](https://youtube.com/c/ShadowCoDM)
-New videos every Wednesday and Sunday, Do subscribe if you enjoy the content!`)
-      .setColor("#12c4ff");
-
-    const embed = new Discord.MessageEmbed()
-      .setTitle("Welcome")
-      .setURL("https://www.youtube.com/c/ShadowCoDM")
-      .setDescription(`Hello! ${member}
-Welcome to ConquerX
-
-${a} Please follow the <#940575037763764265> of the Server.
-
-${a} Take your roles from <#940632102813179925>
-
-${a} Chat with everyone in <#940572040166006787>.
-
-${w} Thank You For Joining Our Server.`)
-      .setColor("#12c4ff")
-      .setImage(`${process.env.welcomeImg}`);
-
-    if (member.guild.id === myServer) {
-
-      client.channels.cache.get(welcomeChannel).send({ content: `${member.user.tag} joined!`, embeds: [embed] })
-
-      /*member.send({ embeds: [memberEmbed, embed] })*/
-
-      client.channels.cache.get('959357633733730324').send({
-        content: `${process.env.modEmoji} **Mod log:**
-> **Member:** ${member}
-> **Member id:** ${member.id}
-> **Member tag:** ${member.user.tag}
-> **Action:** Server Join
-> **Server:** ${member.guild.id}
-> **Channel:** <#940619456609157150>`, embeds: [embed]
-      })
-
-    }
-    //Welcome message
+    const role = member.guild.roles.cache.find(r => r.id === '981631782548045924');
+    member.roles.add(role);
 
   }
 }

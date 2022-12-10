@@ -1,28 +1,31 @@
 module.exports = {
   name: "suggest",
-  aliases: ["Suggest", "suggestion", "Suggestion"],
-  description: "Suggest new video ideas!",
-  run(client, message, args) {
-    const Discord = require("discord.js");
-    const arg = message.content.split(" ").slice(1);
+  aliases: ["suggestion"],
+  async run(client, message, args) {
 
-    if (!arg[0]) return message.channel.send(`Wrong comamnd usage!
-Commands usage: \`-suggest Suggestion...\``)
+    const { MessageEmbed } = require("discord.js");
 
-    const embed = new Discord.MessageEmbed()
-      .setTitle('Suggestion!')
-      .setURL("https://youtube.com/c/ShadowCoDM")
-      .setColor('#12c4ff')
-      .setDescription(`${args.join(" ")}
-Sugegsted by <@${message.author.id}>
-Do check Shadow on [YouTube](https://youtube.com/c/ShadowCoDM)`)
-      .setTimestamp()
+    if (!args[0]) return message.reply({
+      embeds: [
+        new MessageEmbed()
+          .setColor('RED')
+          .setTitle(`Wrong command usage`)
+          .setDescription(`**Correct usage:** \`-suggest your suggestion...\``)
+      ]
+    });
 
-    client.channels.cache.get('949578973497675806').send({ embeds: [embed] }).then(msg => {
-      msg.react("⬆️")
-      msg.react("⬇️")
-    })
+    const embed = new MessageEmbed()
+      .setColor('BLUE')
+      .setTitle(`Nexon Logistics Suggestion System`)
+      .setDescription(`${args.join(' ')}`)
+      .setFooter({
+        text: 'Nexon Logistics',
+        iconURL: 'https://media.discordapp.net/attachments/982291652314017864/984375320876576788/Nexon-Logo-1.5.jpg'
+      })
 
-    message.delete()
+    const msg = await message.channel.send({ embeds: [embed] });
+    msg.react('⬆️')
+    msg.react('⬇️')
+
   }
 }

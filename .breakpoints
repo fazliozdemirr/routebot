@@ -1,3 +1,26 @@
 {
-  "files": {}
+  "files": {
+    "Commands/Utility/help.js": [
+      {
+        "id": "a84f3c26-33b2-41e1-970c-41581ed2b2d1",
+        "line": 1,
+        "version": 2238,
+        "index": 0
+      }
+    ],
+    "Events/messageCreate.js": [
+      {
+        "id": "d7bf53a2-4469-4ac6-9203-a2297d742616",
+        "line": 1,
+        "version": 376,
+        "index": 0
+      },
+      {
+        "id": "40888fa8-a61f-4312-9147-753a2828d220",
+        "line": 1,
+        "version": 376,
+        "index": 0
+      }
+    ]
+  }
 }

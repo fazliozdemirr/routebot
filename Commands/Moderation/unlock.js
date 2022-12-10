@@ -28,26 +28,9 @@ module.exports = {
       .setDescription(`**Channel:** ${channel} \n**Reason:** ${reason}`)
       .setColor("#12c4ff")
 
-    const modEmbed = new MessageEmbed()
-      .setDescription(`**Message:** [Message](${message.url})`)
-      .setColor("12c4ff")
-      .setTimestamp()
-      .setFooter({ text: `This message was issued by Administration` })
-      .setThumbnail(message.author.displayAvatarURL({ dynamic: true, format: 'png' }));
-
     channel.permissionOverwrites.create(message.guild.roles.everyone, { SEND_MESSAGES: true })
 
-
     message.channel.send({ embeds: [embed] })
-
-    client.channels.cache.get('959357633733730324').send({
-      content: `${process.env.modEmoji} **Mod log:**
-> **Content:** ${message.content}
-> **Action:** Channel Unlock
-> **Channel:** ${message.channel}
-> **Message id:** ${message.id}
-> **Moderator:** ${message.author}`, embeds: [modEmbed, embed]
-    })
 
     message.delete()
   }

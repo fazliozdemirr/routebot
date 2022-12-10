@@ -1,62 +1,70 @@
 module.exports = {
   name: "unmute",
-  aliases: ["Unmute", "Un-mute", "un-mute"],
-  description: "Unmute a muted member",
+  aliases: ["Unmute"],
+  perms: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MDOERATE_MEMBERS'],
+  botPerms: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MDOERATE_MEMBERS'],
+  usage: '-unmute [@user] <reason>',
+  description: "Unmute a member",
   run(client, message, args) {
-    {
-      const { MessageEmbed } = require("discord.js");
-      const role = message.guild.roles.cache.find(role => role.name === "muted");
-      const member = message.mentions.members.first();
-      const msg = args.join(" ")
-      const msgSplit = msg.split(' - ');
-      const reason = msgSplit[1] || 'Not specified';
+    const { MessageEmbed } = require("discord.js");
+    const role = message.guild.roles.cache.find(role => role.name === "Muted");
+    const member = message.mentions.members.first();
+    const msg = args.join(" ")
+    const msgSplit = msg.split(' - ');
+    const reason = msgSplit[1] || 'Not specified'
 
-      const notRole = new MessageEmbed()
-        .setDescription("This server doesn't have a mute role!")
-        .setColor("12c4ff");
+    const notRole = new MessageEmbed()
+      .setDescription(`This server doesn't have a mute role!
 
-      /*const notMember = new MessageEmbed()
-          .setDescription("You didn't mention a member!")
-          .setColor("12c4ff");*/
+You can use the command \`muterole-create\` to create the muterole for this server`)
+      .setColor("RED");
 
-      const notMute = new MessageEmbed()
-        .setDescription(`"That user is not muted!"`)
-        .setColor("12c4ff");
+    const notMember = new MessageEmbed()
+      .setDescription(`Wrong command usage!
 
-      const embed = new MessageEmbed()
-        .setDescription(`${member} was unmuted!
+**Command usage:** \`-unmute [@user] - <reason>\``)
+      .setFooter({text: `[] - Required | <> - Optional`})
+      .setColor("RED");
+
+    const noMemberPerms = new MessageEmbed()
+      .setDescription(`You don't have permission to unmute a member!`)
+      .setColor("RED");
+
+    const notMute = new MessageEmbed()
+      .setDescription(`That user is not muted!`)
+      .setColor("RED");
+
+    const higherRole = new MessageEmbed()
+      .setDescription(`You cannot unmute a member who have been muted by a mod who have higher roles than you!`)
+      .setColor("RED");
+
+    const noBotPerms = new MessageEmbed()
+      .setDescription(`I don't have permission to unmute someone!`)
+      .setColor("RED");
+
+    const muteYourself = new MessageEmbed()
+      .setDescription(`You couldn't unmute yourself!`)
+      .setColor("RED");
+
+    const embed = new MessageEmbed()
+      .setDescription(`${member} was unmuted!
 **Reason:** ${reason}`)
-        .setColor("12c4ff");
+      .setColor("12c4ff")
 
-      const modEmbed = new MessageEmbed()
-        .setDescription(`**Message:** [Message](${message.url})`)
-        .setColor("12c4ff")
-        .setTimestamp()
-        .setFooter({ text: `This message was issued by Administration` })
-        .setThumbnail(message.author.displayAvatarURL({ dynamic: true, format: 'png' }));
+    if (!message.member.permissions.has("KICK_MEMBERS")) return message.reply({ embeds: [noMemberPerms] });
+    if (!role) return message.reply({ embeds: [notRole] });
+    if (!message.guild.me.permissions.has("KICK_MEMBERS")) return message.reply({ embeds: [noBotPerms] });
 
-      if (!message.member.permissions.has("KICK_MEMBERS")) return message.channel.send("You don't have permission to do that!");
-      if (!role) return message.channel.send({ embeds: [notRole] });
-      if (!member) return message.channel.send(`Wrong command usage!
-Command usage: \`-mute @user - reason(optional)\``);
-      if (!member.roles.cache.has(role.id)) return message.channel.send({ embeds: [notMute] });
+    if (!member) return message.channel.send({ embeds: [notMember] });
+    
+    if (member.id === message.author.id) return message.reply({embeds: [muteYourself]});
+    
+    if (member.roles.highest.position >= message.member.roles.highest.position && message.author.id !== message.guild.ownerId) return message.reply({ embeds: [higherRole] });
 
-      member.roles.remove(role)
-        .then(() => {
-          message.channel.send({ embeds: [embed] }),
+    if (!member.roles.cache.has(role.id)) return message.channel.send({ embeds: [notMute] });
 
-            client.channels.cache.get('959357633733730324').send({
-              content: `${process.env.modEmoji} **Mod log:**
-> **Content:** ${message.content}
-> **Action:** Unmute
-> **Channel:** ${message.channel}
-> **Message id:** ${message.id}
-> **Moderator:** ${message.author}`, embeds: [modEmbed, embed]
-            })
-        })
-        .catch(() => {
-          message.channel.send("Oops! something went wrong...")
-        })
-    };
+    member.roles.remove(role)
+    message.channel.send({ embeds: [embed] })
+
   }
 }

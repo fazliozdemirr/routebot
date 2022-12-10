@@ -5,25 +5,52 @@ module.exports = {
   run(client, message, args) {
 
 //------------------------------------
-    const Discord = require("discord.js");
+    const { MessageEmbed } = require("discord.js");
+    const msg = args.join(' ').split(' - ')
+    const member = message.mentions.members.first();
+    const reason = msg[1] || 'Not specified';
+console.log(reason)
+    const noPerms = new MessageEmbed()
+      .setDescription(`You don't have permission to warn members!`)
+      .setColor("RED")
 
-    if (!message.member.permissions.has("KICK_MEMBERS")) return message.channel.send("You don't have permission to do that!");
+    if (!message.member.permissions.has("MODERATE_MEMBERS")) return message.reply({ embeds: [noPerms] });
 
-    const user = message.mentions.users.first() || args[0]
+    const wrongUsage = new MessageEmbed()
+      .setTitle('Wrong command usage')
+      .setDescription(`
+**Correct usage:** \`-warn [@user] <reason>\``)
+      .setFooter({ text: `[] - Required | <> - Optional` })
+      .setColor("RED");
 
-    if (!user) message.channel.send(`Wrong command usage!
-Command usage: \`-warn @user - reason(optional)\``)
+    const noBotPerms = new MessageEmbed()
+      .setDescription(`I don't have permission to warn members!`)
+      .setColor('RED');
 
-    const msg = args.join(' ');
-    const msgSplit = msg.split(' - ');
-    const reason = msgSplit[1] || 'Not specified'
+    const warningYourself = new MessageEmbed()
+      .setDescription(`You couldn't warn yourself!`)
+      .setColor('RED');
 
-    const embed = new Discord.MessageEmbed()
+    const higherRole = new MessageEmbed()
+      .setDescription(`You cannot warn a member who have higher/equal roles than you!`)
+      .setColor('RED');
+
+    const embed = new MessageEmbed()
       .setTitle("Warning")
-      .setDescription(`${user} you have been warned\nReason: ${reason}`)
+      .setDescription(`${member} you have been warned\nReason: ${reason}`)
       .setColor("#12c4ff")
-      .setFooter(`Moderator: ${message.author.username}`)
+      .setFooter({text: `Moderator: ${message.author.username}`})
       .setTimestamp()
+
+    if (!member) message.reply({ embeds: [wrongUsage] })
+    
+    if (!message.guild.me.permissions.has("MODERATE_MEMBERS")) return message.reply({ embeds: [noBotPerms] });
+
+        if (member.id === message.author.id) return message.reply({ embeds: [warningYourself] });
+
+    if (member.roles.highest.position >= message.member.roles.highest.position && message.author.id !== message.guild.ownerId) {
+      return message.reply({ embeds: [higherRole] })
+    };
 
     message.channel.send({ embeds: [embed] })
     message.delete()

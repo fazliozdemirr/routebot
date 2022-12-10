@@ -1,6 +1,9 @@
 module.exports = {
   name: "roleperms",
   aliases: ["Roleperms"],
+  perms: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MANAGE_ROLES'],
+  botPerms: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'MANAGE_ROLES'],
+  usage: '-',
   description: "Check the permissions of a role",
   run(client, message, args) {
 
@@ -11,12 +14,11 @@ module.exports = {
 
     const rolePermsEmbed = new MessageEmbed()
       .setTitle(`Permissions for ${role.name} role`)
-      .setURL(`https://youtube.com/c/ShadowCoDM`)
       .setDescription(`${rolePerms}`)
       .setColor(`#12c4ff`)
       .setTimestamp();
 
-if(!message.member.permissions.has('KICK_MEMBERS')) return message.channel.send({content: `You don't have permission to do that!`})
+if(!message.member.permissions.has('MANAGE_ROLES')) return message.channel.send({content: `You don't have permission to do that!`})
     
 if(!role) return message.channel.send({content: `Wrong command usage!
 **Command usage:** \`-roleperms @role\``})

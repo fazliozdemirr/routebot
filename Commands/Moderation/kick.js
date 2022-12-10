@@ -4,42 +4,58 @@ module.exports = {
   description: "Kick a member",
   run(client, message, args) {
 
-    const Discord = require("discord.js");
+    const { MessageEmbed } = require("discord.js");
     const member = message.mentions.members.first();
-    if (!member) return message.channel.send({ content: `Wrong command usage!
-Command usage: \`-kick @user\`` })
-    const kickEmbed = new Discord.MessageEmbed()
+
+    const noPerms = new MessageEmbed()
+      .setDescription(`You don't have permissions to kick members!`)
+      .setColor('RED');
+
+    const noBotPerms = new MessageEmbed()
+      .setDescription(`I don't have permissions to kick members!`)
+      .setColor('RED');
+
+    const kickingYourself = new MessageEmbed()
+      .setDescription(`You couldn't kick yourself!`)
+      .setColor('RED');
+
+    const higherRole = new MessageEmbed()
+      .setDescription(`You cannot kick a member who have higher/equal roles than you!`)
+      .setColor('RED');
+
+    const wrongUsage = new MessageEmbed()
+     .setTitle('Wrong command usage')
+      .setDescription(`
+**Correct usage:** \`-kick [@user]\``)
+      .setColor("RED")
+      .setTimestamp()
+      .setFooter({ text: `[] - Required` });
+
+    if (!message.member.permissions.has("KICK_MEMBERS")) return message.reply({ embeds: [noPerms] });
+
+    if (!member) return message.reply({ embeds: [wrongUsage] })
+
+    const kickChanelEmbed = new MessageEmbed()
       .setDescription(`${member.user.tag} was kicked!`)
+      .setColor("#12c4ff")
+      .setTimestamp()
+      .setFooter({ text: `Moderator: ${message.author.username}` });
+
+    const kickMemberEmbed = new MessageEmbed()
+      .setDescription(`You were kicked from ConquerX by ${message.author.username}!`)
       .setColor("#12c4ff");
 
-    const modEmbed = new Discord.MessageEmbed()
-      .setDescription(`**Message:** [Message](${message.url})`)
-      .setColor("12c4ff")
-      .setTimestamp()
-      .setFooter({ text: `This message was issued by Administration` })
-      .setThumbnail(message.author.displayAvatarURL({ dynamic: true, format: 'png' }));
+    if (!message.guild.me.permissions.has("KICK_MEMBERS")) return message.reply({ embeds: [noBotPerms] });
 
-    if (!message.member.permissions.has("KICK_MEMBERS")) return message.channel.send("You don't have permission to do that!");
+    if (member.id === message.author.id) return message.reply({ embeds: [kickingYourself] });
 
-    if (message.guild.id === `${process.env.myServer}`) {
-      client.channels.cache.get('959357633733730324').send({
-        content: `${process.env.modEmoji} **Mod log:**
-> **Content:** ${message.content}
-> **Action:** Kick
-> **User:** ${member.user.tag}
-> **Channel:** ${message.channel}
-> **Message id:** ${message.id}
-> **Moderator:** ${message.author}`, embeds: [modEmbed, kickEmbed]
-      })
-    }
+    if (member.roles.highest.position >= message.member.roles.highest.position && message.author.id !== message.guild.ownerId) {
+      return message.reply({ embeds: [higherRole] })
+    };
+    
+    member.kick()
+    message.channel.send({ embeds: [kickChanelEmbed] })
+    member.send({ embeds: [kickMemberEmbed] })
 
-    try {
-      member.kick().then(() => {
-        message.channel.send({ embeds: [kickEmbed] })
-      })
-    } catch (e) {
-      console.log(e)
-      message.channel.send("Oops! Something went wrong...")
-    }
   }
 }

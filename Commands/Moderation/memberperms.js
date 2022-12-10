@@ -11,7 +11,6 @@ module.exports = {
 
     const memberPermsEmbed = new MessageEmbed()
       .setTitle(`Permissions for ${member.displayName}`)
-      .setURL(`https://youtube.com/c/ShadowCoDM`)
       .setDescription(`${memberPerms}`)
       .setColor(`#12c4ff`)
       .setTimestamp();

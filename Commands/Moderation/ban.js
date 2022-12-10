@@ -4,56 +4,63 @@ module.exports = {
   description: "Ban a member",
   run(client, message, args) {
 
-    const Discord = require("discord.js");
-    const member = message.mentions.members.first();
+    const { MessageEmbed } = require("discord.js");
+    const member = message.mentions.members.first() || args[0];
+const reason = args.join[1] || 'No reason provided';
+
     const modEmoji = "<:mod:944912016068468737>";
 
-    if (!message.member.permissions.has("BAN_MEMBERS")) return message.channel.send("You don't have permissions to do that!");
+    const noPerms = new MessageEmbed()
+      .setDescription(`You don't have permission to ban members!`)
+      .setColor('RED');
 
-        if (!message.member.roles.cache.has("Administrator")) return message.channel.send("You can't ban Server Admin!");
+    const noBotPerms = new MessageEmbed()
+      .setDescription(`I don't have permission to ban members!`)
+      .setColor('RED');
 
-            if (!message.member.roles.cache.has("Head Moderator")) return message.channel.send("You can't ban Server Admin!");
-    
-    if (!member) return message.channel.send(`Wrong command usage!
-Command usage: \`-ban @user\``);
+    const banningYourself = new MessageEmbed()
+      .setDescription(`You couldn't ban yourself!`)
+      .setColor('RED');
 
-    const modEmbed = new Discord.MessageEmbed()
-      .setDescription(`**Message:** [Message](${message.url})`)
-      .setColor("12c4ff")
+    const higherRole = new MessageEmbed()
+      .setDescription(`You cannot ban a member who have higher/equal roles than you!`)
+      .setColor('RED');
+
+    const wrongUsage = new MessageEmbed()
+      .setTitle('Wrong command usage')
+      .setDescription(`Command usage: \`-ban [@user] <reason>\``)
+      .setColor("RED")
       .setTimestamp()
-      .setFooter({ text: `This message was issued by Administration` })
-      .setThumbnail(message.author.displayAvatarURL({ dynamic: true, format: 'png' }));
+      .setFooter({ text: `[] - Required | <> - Optional` });
 
-    const banChanelEmbed = new Discord.MessageEmbed()
-      .setDescription(`${member.user.tag} was banned!`)
+    if (!message.member.permissions.has("BAN_MEMBERS")) return message.reply({ embeds: [noPerms] });
+
+    if (!member) return message.reply({ embeds: [wrongUsage] });
+
+    const banChanelEmbed = new MessageEmbed()
+      .setDescription(`${member.user.tag} was banned!
+**Reason:** ${reason}
+`)
       .setColor("#12c4ff")
       .setTimestamp()
       .setFooter({ text: `This message was issued by Administration` });
 
-    const banMemberEmbed = new Discord.MessageEmbed()
-      .setDescription(`You were banned in ConquerX!`)
+    const banMemberEmbed = new MessageEmbed()
+      .setDescription(`You were banned in ${message.guild.name} by ${message.author.username}!
+**Reason:** ${reason}`)
       .setColor("#12c4ff");
 
-    if (message.guild = `${process.env.myServer}`) {
-      client.channels.cache.get('959357633733730324').send({
-        content: `${modEmoji} **Mod log:**
-> **Content:** ${message.content}
-> **Action:** Ban
-> **User:** ${member.user.tag}
-> **Channel:** ${message.channel}
-> **Message id:** ${message.id}
-> **Moderator:** ${message.author}`, embeds: [modEmbed, banChanelEmbed]
-      })
-    }
+    if (!message.guild.me.permissions.has("BAN_MEMBERS")) return message.reply({ embeds: [noBotPerms] });
 
-    try {
-      member.ban()
-      message.channel.send({ embeds: [banChanelEmbed] });
-      member.send({ embeds: [banMemberEmbed] });
-    } catch (e) {
-      console.log(e)
-      message.channel.send("Oops! Something went wrong!")
+    if (member.id === message.author.id) return message.reply({ embeds: [banningYourself] });
+
+    if (member.roles.highest.position >= message.member.roles.highest.position && message.author.id !== message.guild.ownerID) {
+      return message.reply({ embeds: [higherRole] })
     };
+      
+    member.ban({ reason: `${reason}`})
+    message.channel.send({ embeds: [banChanelEmbed] });
+    member.send({ embeds: [banMemberEmbed] });
 
   }
 }
